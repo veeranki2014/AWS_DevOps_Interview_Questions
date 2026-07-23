@@ -1,5 +1,5 @@
 # Questions
-1.` Could you please introduce yourself?`
+1. Could you please introduce yourself?
 2. Could you please give me a recent experience of yours?
 3. How would you choose between **ECS and EKS** for a new production workload?
 4. How would you design a secure and highly available ECS form?
