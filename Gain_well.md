@@ -1,7 +1,7 @@
 # Questions
 1. Could you please introduce yourself?
 2. Could you please give me a recent experience of yours?
-3. How would you choose between ECS and EKS for a new production workload?
+3. How would you choose between **ECS and EKS** for a new production workload?
 4. How would you design a secure and highly available ECS form?
 5. How would you structure the Terraform for a large organization?
 6. How do you manage the Terraform State securely?
