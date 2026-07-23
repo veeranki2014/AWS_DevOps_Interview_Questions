@@ -21,16 +21,8 @@
 20. Can you provide an example of architecture trade-offs in your project?
 
 
-
+---
 💬 **Question**: Please give a quick introduction about yourself.
-
----
-
-⭐️ **Answer**:
-
-Certainly! Here’s a concise, relevant introduction you can use:
-
----
 
 My name is [Your Name], and I have over 16 years of experience in the IT industry, specializing in cloud infrastructure, DevOps, and automation. My core expertise is in designing, deploying, and managing cloud environments, particularly on Microsoft Azure, where I have extensive hands-on experience with services like Azure Kubernetes Service (AKS), Virtual Machines, Azure SQL, and networking components.
 
@@ -42,12 +34,8 @@ I hold certifications including Microsoft Azure Solutions Architect Expert, Azur
 
 I’m passionate about leveraging automation and cloud-native technologies to deliver scalable, secure, and reliable solutions, and I look forward to contributing my expertise to your team at GlobalLogic.
 
-
-💬 **Question**: Do you have experience with landing zone or infrastructure-level setup?
-
 ---
-
-⭐️ **Answer**:
+💬 **Question**: Do you have experience with landing zone or infrastructure-level setup?
 
 Yes, I have hands-on experience with both landing zone and infrastructure-level setup in cloud environments, particularly on Azure and AWS.
 
@@ -69,12 +57,8 @@ Yes, I have hands-on experience with both landing zone and infrastructure-level 
 **In summary:**  
 I have end-to-end experience in designing, implementing, and operationalizing landing zones and infrastructure-level setups, leveraging automation and best practices to deliver secure, scalable, and compliant cloud environments.
 
-
-💬 **Question**: When you mention connectivity in terms of VNets, what exactly did you establish between accounts? Did you automate any account vending process or similar tasks?
-
 ---
-
-⭐️ **Answer**:
+💬 **Question**: When you mention connectivity in terms of VNets, what exactly did you establish between accounts? Did you automate any account vending process or similar tasks?
 
 Absolutely, I have been directly involved in establishing connectivity and automating account provisioning (account vending) processes across both Azure and AWS environments.
 
@@ -100,14 +84,8 @@ Absolutely, I have been directly involved in establishing connectivity and autom
 **In summary:**  
 I have hands-on experience automating both the network connectivity and the account vending process, leveraging Terraform and CI/CD pipelines to ensure secure, scalable, and compliant multi-account cloud environments.
 
-
-
-
-💬 **Question**: What exactly was your role in the landing zone process—specifically, did you handle new account creation (in a new or sub-OU), provisioning, and handoff to end users?
-
 ---
-
-⭐️ **Answer**:
+💬 **Question**: What exactly was your role in the landing zone process—specifically, did you handle new account creation (in a new or sub-OU), provisioning, and handoff to end users?
 
 Yes, I was directly involved in the end-to-end process of landing zone automation, including new account provisioning and setup within the organizational structure (OU/sub-OU). Here’s how my role fit into this process:
 
