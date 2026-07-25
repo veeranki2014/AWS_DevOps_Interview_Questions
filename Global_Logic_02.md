@@ -921,3 +921,161 @@ You're right that `terraform plan` compares the state file with the actual infra
 - I also ensure that state locking is enabled and that team communication is clear to avoid overlapping changes.
 
 So, while Terraform is designed to detect drift, there are edge cases—especially with dependencies, provider limitations, or state issues—where plan and apply can diverge and cause apply-time failures.
+
+---
+💬 **Question**: Have you personally encountered a situation where `terraform plan` succeeded but `terraform apply` failed? Can you describe it from your own experience?
+
+Yes, I have encountered situations where `terraform plan` succeeded but `terraform apply` failed in my work as an Azure DevOps Engineer, especially when managing complex Azure environments with Terraform.
+
+**Specific Example from My Experience:**
+
+- **Scenario: Resource Dependency Issue in Azure**
+    - In one project, we were managing Azure Virtual Machines and associated resources (like network interfaces and public IPs) using Terraform.
+    - A team member manually deleted a network interface in the Azure portal, but the Terraform state file still referenced it.
+    - When I ran `terraform plan`, it showed that Terraform intended to recreate the missing network interface and attach it to the VM. The plan phase completed successfully, indicating the actions to be taken.
+    - However, during `terraform apply`, the process failed. The error was due to a dependency issue: the VM was still referencing the deleted network interface, and Azure’s API returned a "resource not found" or "dependency not ready" error when Terraform tried to update or recreate the VM before the network interface was fully available.
+    - This kind of failure can also happen if there are propagation delays in Azure or if resources are deleted out of order, causing the apply phase to hit errors that the plan phase cannot predict.
+
+**How I Resolved It:**
+- I used `terraform state rm` to remove the reference to the missing network interface from the state file.
+- Then, I re-ran `terraform plan` and `terraform apply`, which allowed Terraform to recreate the network interface and update the VM successfully.
+
+**Key Takeaways:**
+- The plan phase is a simulation and may not catch real-time API or dependency issues that only surface during apply.
+- Manual changes in the cloud portal or out-of-band modifications can lead to state drift and apply-time failures.
+- Cleaning up the state file and ensuring dependencies are correctly managed is crucial for successful Terraform operations.
+
+This experience highlights the importance of keeping Terraform state in sync with actual infrastructure and avoiding manual changes whenever possible.
+
+---
+💬 **Question**: Can you explain a scenario where a resource (like a role) is created during `terraform apply`, but because it doesn't have the right permissions, the creation of a dependent resource (like an EC2 instance) fails during the same apply?
+
+Absolutely, I understand this scenario and have seen similar issues in practice.
+
+- When using Terraform to provision multiple resources that depend on each other—such as creating an IAM role and then launching an EC2 instance that needs to assume that role—**the plan phase only checks the intended changes**, not the actual runtime permissions or propagation delays.
+- During `terraform apply`, Terraform will attempt to create resources in the order defined by dependencies. However, **some resources (like IAM roles or policies) may not be fully propagated or available immediately** after creation, especially in cloud providers like AWS or Azure.
+- If you try to create an EC2 instance that needs to assume a role that was just created in the same apply, there can be a race condition: the EC2 creation step may fail because the role or its permissions are not yet fully available or propagated in the cloud provider's backend.
+- This results in `terraform plan` succeeding (since it doesn't check real-time propagation or permissions), but `terraform apply` failing with an error like "role not found" or "insufficient permissions".
+
+**Example from My Experience:**
+- I have encountered this when automating Azure resources where a Managed Identity or Role Assignment is created, and immediately after, a VM or App Service is provisioned that requires that identity or role.
+- The apply would sometimes fail because Azure hadn’t fully propagated the new role assignment, causing permission errors.
+
+**How I Handle This:**
+- I often use the `depends_on` meta-argument in Terraform to explicitly define dependencies, ensuring Terraform waits for the role or policy to be created before proceeding.
+- In some cases, I introduce a small delay or split the apply into two stages: first apply the roles/policies, then apply the dependent resources.
+- I also monitor for propagation delays and re-run `terraform apply` if necessary after a short wait.
+
+**Summary:**
+- This is a classic example of a timing or propagation issue in infrastructure as code, where `terraform plan` cannot predict runtime permission problems that only surface during `terraform apply`. Proper dependency management and awareness of cloud provider propagation delays are key to avoiding these issues.
+
+---
+
+💬 **Question**: Discussion about Terraform apply failures due to resource dependencies and IAM policy propagation issues.
+
+Yes, that's a common scenario in infrastructure automation. When using Terraform to create multiple interdependent resources—such as IAM roles and EC2 instances (or, in Azure, Managed Identities and VMs)—the following can happen:
+
+- **Plan Phase**: `terraform plan` only simulates the changes and doesn't check real-time permissions or whether newly created roles/policies are fully available.
+- **Apply Phase**: During `terraform apply`, Terraform tries to create resources in the order defined by dependencies. However, cloud providers like AWS and Azure may have propagation delays for IAM roles, policies, or permissions.
+    - For example, if you create a role and immediately try to use it to launch an EC2 instance (or assign it to a VM), the instance creation can fail if the role isn't fully propagated yet.
+    - This results in an error during apply, even though the plan succeeded.
+
+**From my experience:**
+- I've encountered this issue when creating Azure Managed Identities and assigning them to VMs or App Services. Sometimes, the identity or its permissions weren't immediately available, causing the dependent resource creation to fail.
+- To handle this, I use the `depends_on` argument in Terraform to enforce the correct order, and in some cases, split the deployment into two stages: first create the roles/policies, then apply the dependent resources after propagation.
+- Additionally, I monitor for propagation delays and, if necessary, re-run the apply after a short wait.
+
+**Key Points:**
+- IAM policy propagation delays are a well-known cause of apply-time failures.
+- Explicitly defining dependencies and, if needed, separating resource creation into multiple applies can help mitigate these issues.
+- This is a practical challenge in real-world infrastructure as code workflows, and I've managed it in both Azure and AWS environments.
+
+---
+💬 **Question**: Can you give me a sample Terraform pipeline that you've created, specifically for setting up multiple environments?
+
+Certainly! I’ve designed and implemented several Terraform pipelines for multi-environment (Dev/QA/Prod) setups, primarily using Azure DevOps and Jenkins. Here’s a typical approach I follow, with an example structure and key practices:
+
+---
+
+**1. Repository Structure:**
+- I organize the Terraform codebase using separate folders or workspaces for each environment.
+    ```
+    ├── environments/
+    │   ├── dev/
+    │   │   └── terraform.tfvars
+    │   ├── qa/
+    │   │   └── terraform.tfvars
+    │   └── prod/
+    │       └── terraform.tfvars
+    ├── modules/
+    │   └── <reusable-modules>
+    ├── main.tf
+    ├── variables.tf
+    └── outputs.tf
+    ```
+
+**2. Pipeline Steps (Azure DevOps YAML Example):**
+```yaml
+# Azure DevOps Pipeline for Terraform Multi-Environment Deployment
+trigger:
+  branches:
+    include:
+      - main
+
+parameters:
+  - name: environment
+    displayName: Environment
+    type: string
+    default: 'dev'
+    values:
+      - dev
+      - qa
+      - prod
+
+stages:
+  - stage: TerraformInit
+    jobs:
+      - job: Init
+        steps:
+          - checkout: self
+          - script: |
+              terraform init -backend-config="key=${{ parameters.environment }}/terraform.tfstate"
+            displayName: 'Terraform Init'
+
+  - stage: TerraformPlan
+    jobs:
+      - job: Plan
+        steps:
+          - script: |
+              terraform plan -var-file="environments/${{ parameters.environment }}/terraform.tfvars" -out=tfplan
+            displayName: 'Terraform Plan'
+
+  - stage: TerraformApply
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: Apply
+        steps:
+          - script: |
+              terraform apply -auto-approve tfplan
+            displayName: 'Terraform Apply'
+```
+- **Parameterization**: The pipeline uses a parameter to select the environment, ensuring the correct variable files and state files are used.
+- **Stages**: Separate stages for `init`, `plan`, and `apply` for better control and visibility.
+- **State Management**: Uses remote backend (like Azure Storage) with environment-specific state files.
+
+**3. Key Practices:**
+- **Reusable Modules**: I create reusable Terraform modules for common resources (e.g., networking, compute, storage) to avoid duplication.
+- **Remote State**: Store state files securely in Azure Storage or AWS S3, with locking enabled to prevent concurrent modifications.
+- **Secrets Management**: Integrate with Azure Key Vault or AWS Secrets Manager for sensitive variables.
+- **Approval Gates**: For production, I add manual approval steps before the apply stage.
+- **Automated Validation**: Run `terraform validate` and `terraform fmt` as part of the pipeline for code quality.
+
+**4. Real-World Example:**
+At Mashreq Bank, I set up a Jenkins pipeline for Terraform that:
+- Pulled code from GitHub.
+- Used environment-specific variable files.
+- Ran `terraform init`, `plan`, and `apply` in sequence.
+- Deployed Azure resources like VMs, VNets, and SQL Databases across Dev, QA, and Prod, ensuring isolation and consistency.
+
+**Summary:**
+My pipelines are designed for flexibility, security, and reusability, enabling seamless multi-environment deployments with minimal manual intervention. This approach ensures infrastructure consistency and compliance across all stages of the SDLC.
