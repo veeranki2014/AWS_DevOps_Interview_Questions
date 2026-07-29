@@ -30,36 +30,42 @@
    
 6. **Integrate AWS services**
 
-    Depending on the application, I integrate services such as:
-    Amazon ECR: Store Docker images
-    Amazon ECS or EKS: Run containerized applications
-    AWS Lambda: Run serverless applications
-    Amazon S3 and CloudFront: Host and distribute static applications
-    Elastic Beanstalk: Deploy managed web applications
-    AWS CodeDeploy: Perform rolling or blue/green deployments
-    AWS Secrets Manager or Systems Manager Parameter Store: Manage runtime secrets
-    Amazon CloudWatch: Collect logs, metrics, and alarms
-   7. **Provision infrastructure as code**
-   For Terraform, I add steps for:
-   terraform fmt -check
-   terraform init
-   terraform validate
-   terraform plan
-   terraform apply
-   I commonly store Terraform state in Amazon S3 and use state locking where supported by the selected backend configuration. Pull requests create a plan, while apply is limited to protected branches and approved environments.
-   8. **Implement environments and approvals**
-   I define GitHub environments such as development, qa, and production.
-   Production environments can require reviewers and enforce deployment branch restrictions.
-   Each environment can use a different AWS IAM role, account, or region.
-   In larger organizations, I normally deploy Dev, QA, and Production into separate AWS accounts.
-   9. **Monitor and handle rollback**
-   After deployment, I:
-   Run application health checks and smoke tests.
-   Review CloudWatch logs, alarms, and deployment events.
-   Send notifications through Amazon SNS, email, Slack, or Microsoft Teams.
-   Roll back to the previous ECS task definition, Lambda version, artifact, or infrastructure release if validation fails.
-   Example: Build and deploy a Docker application to Amazon ECR and ECS
-   name: AWS CI/CD Pipeline
+       Depending on the application, I integrate services such as:
+       Amazon ECR: Store Docker images
+       Amazon ECS or EKS: Run containerized applications
+       AWS Lambda: Run serverless applications
+       Amazon S3 and CloudFront: Host and distribute static applications
+       Elastic Beanstalk: Deploy managed web applications
+       AWS CodeDeploy: Perform rolling or blue/green deployments
+       AWS Secrets Manager or Systems Manager Parameter Store: Manage runtime secrets
+       Amazon CloudWatch: Collect logs, metrics, and alarms
+7.**Provision infrastructure as code**
+
+      For Terraform, I add steps for:
+      terraform fmt -check
+      terraform init
+      terraform validate
+      terraform plan
+      terraform apply
+      I commonly store Terraform state in Amazon S3 and use state locking where supported by the selected backend configuration. Pull requests create a plan, while apply is limited to protected branches and approved environments.
+   
+      
+8. **Implement environments and approvals**
+
+      I define GitHub environments such as development, qa, and production.
+      Production environments can require reviewers and enforce deployment branch restrictions.
+      Each environment can use a different AWS IAM role, account, or region.
+      In larger organizations, I normally deploy Dev, QA, and Production into separate AWS accounts.
+
+9. **Monitor and handle rollback**
+
+      After deployment, I:
+      Run application health checks and smoke tests.
+      Review CloudWatch logs, alarms, and deployment events.
+      Send notifications through Amazon SNS, email, Slack, or Microsoft Teams.
+      Roll back to the previous ECS task definition, Lambda version, artifact, or infrastructure release if validation fails.
+      Example: Build and deploy a Docker application to Amazon ECR and ECS
+      name: AWS CI/CD Pipeline
 
 on:
   pull_request:
