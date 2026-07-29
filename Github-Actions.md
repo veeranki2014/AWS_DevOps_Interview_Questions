@@ -166,7 +166,8 @@ A workflow is triggered by an event such as a pull request, a push to main, or a
     permissions:
       contents: read
       id-token: write
-    The token contains claims identifying the repository, branch, organization, workflow, or GitHub environment initiating the request.
+    The token contains claims identifying the repository, branch, organization, workflow, or GitHub environment
+    initiating the request.
 
 **The workflow requests an AWS role**
 
@@ -196,7 +197,8 @@ A workflow is triggered by an event such as a pull request, a push to main, or a
 
 **The workflow accesses AWS services**
 
-    GitHub Actions uses the temporary credentials to perform only the operations allowed by the IAM role’s permission policy—for example:
+    GitHub Actions uses the temporary credentials to perform only the operations allowed by the IAM role’s 
+    permission policy—for example:
     Push an image to Amazon ECR
     Deploy a service to Amazon ECS or EKS
     Upload files to Amazon S3
