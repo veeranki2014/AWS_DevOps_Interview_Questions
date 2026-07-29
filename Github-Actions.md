@@ -161,20 +161,22 @@ The GitHub Actions workflow starts
 A workflow is triggered by an event such as a pull request, a push to main, or a manual deployment.
 
 **GitHub generates an OIDC token**
-    The workflow requests a signed JSON Web Token from GitHub’s OIDC provider. For this, the workflow requires:
+
+    - The workflow requests a signed JSON Web Token from GitHub’s OIDC provider. For this, the workflow requires:
     permissions:
       contents: read
       id-token: write
     The token contains claims identifying the repository, branch, organization, workflow, or GitHub environment initiating the request.
 
-The workflow requests an AWS role
-GitHub Actions sends the token to AWS Security Token Service and calls AssumeRoleWithWebIdentity.
-The workflow typically uses:
-- name: Configure AWS credentials
-  uses: aws-actions/configure-aws-credentials@v6
-  with:
-    role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
-    aws-region: us-east-1
+**The workflow requests an AWS role**
+
+    GitHub Actions sends the token to AWS Security Token Service and calls AssumeRoleWithWebIdentity.
+    The workflow typically uses:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+        aws-region: us-east-1
 
 AWS validates the request
 AWS STS verifies that:
