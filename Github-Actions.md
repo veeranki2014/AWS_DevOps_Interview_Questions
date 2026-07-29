@@ -233,7 +233,9 @@ A workflow is triggered by an event such as a pull request, a push to main, or a
     }
 
 #### Why I prefer OIDC
-    “I prefer OIDC because it eliminates permanent AWS credentials from GitHub secrets. AWS provides short-lived credentials for each workflow run, and access is controlled through IAM trust conditions and least-privilege permission policies. This reduces the risk of credential leakage and makes rotation unnecessary.”
+    “I prefer OIDC because it eliminates permanent AWS credentials from GitHub secrets. AWS provides short-lived
+    credentials for each workflow run, and access is controlled through IAM trust conditions and least-privilege 
+    permission policies. This reduces the risk of credential leakage and makes rotation unnecessary.”
 
 **Important security practices**
 
@@ -248,4 +250,9 @@ A workflow is triggered by an event such as a pull request, a push to main, or a
     Use CloudTrail to audit role assumptions and AWS API activity.
 **Short interview answer**
 
-    “I integrate GitHub Actions with AWS using OIDC. The workflow requests a signed OIDC token from GitHub and presents it to AWS STS using AssumeRoleWithWebIdentity. STS validates the token against the IAM role’s trust policy, including the repository, branch, and audience claims. If validation succeeds, AWS returns short-lived credentials. The workflow then uses those credentials to access services such as ECR, ECS, S3, or Lambda according to the role’s permission policy. This is more secure than storing permanent AWS access keys because the credentials are temporary and access can be tightly restricted.”
+    “I integrate GitHub Actions with AWS using OIDC. The workflow requests a signed OIDC token from GitHub and presents
+    it to AWS STS using AssumeRoleWithWebIdentity. STS validates the token against the IAM role’s trust policy, 
+    including the repository, branch, and audience claims. If validation succeeds, AWS returns short-lived credentials. 
+    The workflow then uses those credentials to access services such as ECR, ECS, S3, or Lambda according to the role’s
+    permission policy. This is more secure than storing permanent AWS access keys because the credentials are temporary
+    and access can be tightly restricted.”
