@@ -162,7 +162,7 @@ A workflow is triggered by an event such as a pull request, a push to main, or a
 
 **GitHub generates an OIDC token**
 
-    - The workflow requests a signed JSON Web Token from GitHub’s OIDC provider. For this, the workflow requires:
+    The workflow requests a signed JSON Web Token from GitHub’s OIDC provider. For this, the workflow requires:
     permissions:
       contents: read
       id-token: write
@@ -178,60 +178,66 @@ A workflow is triggered by an event such as a pull request, a push to main, or a
         role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
         aws-region: us-east-1
 
-AWS validates the request
-AWS STS verifies that:
-GitHub issued and signed the token.
-The token audience is sts.amazonaws.com.
-The repository, branch, or environment matches the IAM role’s trust policy.
-The workflow is authorized to assume that specific role.
+**AWS validates the request**
 
-AWS returns temporary credentials
-If validation succeeds, STS provides a temporary:
-Access key ID
-Secret access key
-Session token
-These credentials expire automatically after a limited period.
+    AWS STS verifies that:
+    GitHub issued and signed the token.
+    The token audience is sts.amazonaws.com.
+    The repository, branch, or environment matches the IAM role’s trust policy.
+    The workflow is authorized to assume that specific role.
 
-The workflow accesses AWS services
-GitHub Actions uses the temporary credentials to perform only the operations allowed by the IAM role’s permission policy—for example:
-Push an image to Amazon ECR
-Deploy a service to Amazon ECS or EKS
-Upload files to Amazon S3
-Update a Lambda function
-Run Terraform against AWS
+**AWS returns temporary credentials**
 
-Trust policy vs. permission policy
-This distinction is important in interviews:
-The trust policy answers: “Who can assume this IAM role?”
-The permission policy answers: “What can that role do after it is assumed?”
-For example, the trust policy might allow only the main branch of one GitHub repository:
-{
-  "Effect": "Allow",
-  "Principal": {
-    "Federated": "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
-  },
-  "Action": "sts:AssumeRoleWithWebIdentity",
-  "Condition": {
-    "StringEquals": {
-      "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-      "token.actions.githubusercontent.com:sub":
-        "repo:my-organization/my-repository:ref:refs/heads/main"
+    If validation succeeds, STS provides a temporary:
+    Access key ID
+    Secret access key
+    Session token
+    These credentials expire automatically after a limited period.
+
+**The workflow accesses AWS services**
+
+    GitHub Actions uses the temporary credentials to perform only the operations allowed by the IAM role’s permission policy—for example:
+    Push an image to Amazon ECR
+    Deploy a service to Amazon ECS or EKS
+    Upload files to Amazon S3
+    Update a Lambda function
+    Run Terraform against AWS
+
+**Trust policy vs. permission policy**
+
+    This distinction is important in interviews:
+    The trust policy answers: “Who can assume this IAM role?”
+    The permission policy answers: “What can that role do after it is assumed?”
+    For example, the trust policy might allow only the main branch of one GitHub repository:
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+          "token.actions.githubusercontent.com:sub":
+            "repo:my-organization/my-repository:ref:refs/heads/main"
+        }
+      }
     }
-  }
-}
-The role’s permission policy could then allow access only to a specific ECR repository and ECS service.
-Why I prefer OIDC
-“I prefer OIDC because it eliminates permanent AWS credentials from GitHub secrets. AWS provides short-lived credentials for each workflow run, and access is controlled through IAM trust conditions and least-privilege permission policies. This reduces the risk of credential leakage and makes rotation unnecessary.”
 
-Important security practices
-In production, I would:
-Restrict the trust policy to specific repositories, branches, or GitHub environments.
-Avoid wildcard conditions such as allowing every repository.
-Use separate IAM roles for development, QA, and production.
-Use separate AWS accounts where possible.
-Give each role only the required permissions.
-Protect the GitHub production environment with required reviewers.
-Avoid printing tokens or credentials in workflow logs.
-Use CloudTrail to audit role assumptions and AWS API activity.
-Short interview answer
-“I integrate GitHub Actions with AWS using OIDC. The workflow requests a signed OIDC token from GitHub and presents it to AWS STS using AssumeRoleWithWebIdentity. STS validates the token against the IAM role’s trust policy, including the repository, branch, and audience claims. If validation succeeds, AWS returns short-lived credentials. The workflow then uses those credentials to access services such as ECR, ECS, S3, or Lambda according to the role’s permission policy. This is more secure than storing permanent AWS access keys because the credentials are temporary and access can be tightly restricted.”
+#### Why I prefer OIDC
+    “I prefer OIDC because it eliminates permanent AWS credentials from GitHub secrets. AWS provides short-lived credentials for each workflow run, and access is controlled through IAM trust conditions and least-privilege permission policies. This reduces the risk of credential leakage and makes rotation unnecessary.”
+
+**Important security practices**
+
+    In production, I would:
+    Restrict the trust policy to specific repositories, branches, or GitHub environments.
+    Avoid wildcard conditions such as allowing every repository.
+    Use separate IAM roles for development, QA, and production.
+    Use separate AWS accounts where possible.
+    Give each role only the required permissions.
+    Protect the GitHub production environment with required reviewers.
+    Avoid printing tokens or credentials in workflow logs.
+    Use CloudTrail to audit role assumptions and AWS API activity.
+**Short interview answer**
+
+    “I integrate GitHub Actions with AWS using OIDC. The workflow requests a signed OIDC token from GitHub and presents it to AWS STS using AssumeRoleWithWebIdentity. STS validates the token against the IAM role’s trust policy, including the repository, branch, and audience claims. If validation succeeds, AWS returns short-lived credentials. The workflow then uses those credentials to access services such as ECR, ECS, S3, or Lambda according to the role’s permission policy. This is more secure than storing permanent AWS access keys because the credentials are temporary and access can be tightly restricted.”
