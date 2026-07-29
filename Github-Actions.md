@@ -1,8 +1,8 @@
 ## how I typically create a GitHub Actions workflow using AWS services for application and infrastructure deployments.
-1. Define the workflow as code
+1. **Define the workflow as code**
 I create a YAML workflow such as **.github/workflows/aws-deployment.yml**
 Keeping the workflow with the source code provides version control, traceability, and peer review.
-2. Configure workflow triggers
+2. **Configure workflow triggers**
 I use the on section to execute the workflow for events such as:
 Pull requests to validate changes
 Commits to main or develop
