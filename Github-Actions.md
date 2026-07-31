@@ -1,3 +1,5 @@
+# https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-with-reusable-workflows
+
 ## how I typically create a GitHub Actions workflow using AWS services for application and infrastructure deployments.
 1. **Define the workflow as code**
    - I create a YAML workflow such as **.github/workflows/aws-deployment.yml**
