@@ -97,7 +97,7 @@ Copy dependency manifests first, install dependencies, and copy frequently chang
 ```dockerfile
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY . .
+COPY .. .
 ```
 
 This avoids reinstalling dependencies for every source-code change.
